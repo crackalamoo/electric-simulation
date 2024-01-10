@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.colors as colors
@@ -15,8 +16,9 @@ m = np.array([
     938*3+940*4, 0.511, 0.511, 0.511
 ]) # unit: MeV
 q = np.array([
-    3, -1, -1, 0
+    3, -1, -1, -1
 ]) # unit: q_e
+
 DISTANCES = np.array([
     0, 1, 1, 4
 ]) * 52.9/3 # unit: pm (based on Bohr radius)
@@ -29,11 +31,12 @@ for i in range(1, N):
     angle = ANGLES[i]
     state[i,0] = dist * np.cos(angle)
     state[i,1] = dist * np.sin(angle)
-    vi = np.sqrt(m[0]/dist)
+    vi = np.sqrt(np.abs(COULOMB_K*q[i]*q[0])/(dist*m[0]))
     state[i,2] = vi * (state[i,1]-state[0,1])/dist
     state[i,3] = vi * (state[i,0]-state[0,0])/dist
 
-import matplotlib
+simulation = simulate_steps(state, m, q, DT, 20)
+
 seismic = matplotlib.colormaps['seismic'].resampled(255)
 newcolors = seismic(np.linspace(0, 1, 255))
 for i in range(3):
