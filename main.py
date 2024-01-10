@@ -6,10 +6,10 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 from simulation import *
 
-DT = 1e-20
-N = 2
-SIM_LEN = 10000
-SIM_SPEED = 10
+DT = 1e-21
+N = 4
+SIM_LEN = 100000
+SIM_SPEED = 100
 
 state = np.zeros((N,4))
 m = np.array([
@@ -23,7 +23,7 @@ DISTANCES = np.array([
     0, 1, 1, 4
 ]) * 52.9/q[0] # unit: pm (based on Bohr radius)
 ANGLES = np.random.rand(N) * 2*np.pi
-# ANGLES[2] = ANGLES[1] + np.pi
+ANGLES[2] = ANGLES[1] + np.pi
 
 
 for i in range(1, N):
@@ -45,7 +45,9 @@ for i in range(3):
 newcolors[np.where(newcolors < 0)] = 0
 cmap = colors.ListedColormap(newcolors)
 
-max_coord = np.max(DISTANCES)
+print(len(simulation))
+print(np.concatenate(simulation)[:,:2].shape)
+max_coord = np.max(np.abs(np.concatenate(simulation)[:,:2])) * 1.2
 fig = plt.figure()
 scatter = plt.scatter(state[:,0], state[:,1], s=np.log(m[:N]/np.min(m[:N])+1)*10,
                       c=q[:N], cmap=cmap, vmin=-3, vmax=3)
