@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.integrate import RK45
+
 EPS = 1e-12 # epsilon for numerical stability
 COULOMB_K = 2.533e38 # unit: MeV pm^3/e^2 s^2
 
@@ -34,9 +36,12 @@ def simulate_steps(state0, m, q, h, steps):
         return d
 
     simulation = [state0]
-    y = y0
+    solver = RK45(
+        lambda t,y: get_derivative(y), 0, y0, t_bound=h*steps+1, max_step=h
+    )
     for _ in range(steps):
-        y += h * get_derivative(y)
-        state = np.reshape(y, state0.shape)
+        # y += h * get_derivative(y)
+        solver.step()
+        state = np.reshape(solver.y, state0.shape)
         simulation.append(np.copy(state))
     return np.array(simulation)

@@ -1,43 +1,37 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib.colors as colors
-import matplotlib.cm as cm
+from matplotlib import animation, colors, colormaps
 from simulation import *
 
-DT = 1e-21
-N = 4
-SIM_LEN = 100000
-SIM_SPEED = 100
+DT = 1e-19
+N = 3
+SIM_LEN = 4000
+SIM_SPEED = 4
 
 state = np.zeros((N,4))
 m = np.array([
-    938*3+940*4, 0.511, 0.511, 0.511
+    938, 0.511, 938
 ]) # unit: MeV
 q = np.array([
-    3, -1, -1, -1
+    1, -1, 1
 ]) # unit: q_e
 
-DISTANCES = np.array([
-    0, 1, 1, 4
-]) * 52.9/q[0] # unit: pm (based on Bohr radius)
-ANGLES = np.random.rand(N) * 2*np.pi
-ANGLES[2] = ANGLES[1] + np.pi
-
-
-for i in range(1, N):
-    dist = DISTANCES[i]
-    angle = ANGLES[i]
-    state[i,0] = dist * np.cos(angle)
-    state[i,1] = dist * np.sin(angle)
-    vi = np.sqrt(np.abs(COULOMB_K*q[i]*q[0])/(dist*m[i]))
-    state[i,2] = vi * (state[i,1]-state[0,1])/dist
-    state[i,3] = -vi * (state[i,0]-state[0,0])/dist
+dist = 52.9/q[0]
+# angle = np.random.rand() * 2*np.pi
+angle = 1.1
+print(angle)
+state[1,0] = dist * np.cos(angle)
+state[1,1] = dist * np.sin(angle)
+vi = np.sqrt(np.abs(COULOMB_K*q[1]*q[0])/(dist*m[1]))
+state[1,2] = vi * (state[1,1]-state[0,1])/dist
+state[1,3] = -vi * (state[1,0]-state[0,0])/dist
+state[2,0] = -190
+state[2,2] = vi*0.4
 
 simulation = simulate_steps(state, m, q, DT, SIM_LEN)
 
-seismic = matplotlib.colormaps['seismic'].resampled(255)
+seismic = colormaps['seismic'].resampled(255)
 newcolors = seismic(np.linspace(0, 1, 255))
 for i in range(3):
     newcolors[:127,i] -= np.linspace(0,80,127)/256
@@ -47,7 +41,7 @@ cmap = colors.ListedColormap(newcolors)
 
 print(len(simulation))
 print(np.concatenate(simulation)[:,:2].shape)
-max_coord = np.max(np.abs(np.concatenate(simulation)[:,:2])) * 1.2
+max_coord = dist * 2
 fig = plt.figure()
 scatter = plt.scatter(state[:,0], state[:,1], s=np.log(m[:N]/np.min(m[:N])+1)*10,
                       c=q[:N], cmap=cmap, vmin=-3, vmax=3)
