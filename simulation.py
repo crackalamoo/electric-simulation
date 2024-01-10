@@ -4,7 +4,7 @@ COULOMB_K = 2.533e38 # unit: MeV pm^3/e^2 s^2
 
 def coulomb_law(x1, x2, y1, y2, q1, q2, m1):
     # x-direction acceleration of q1 due to charge q2
-    return COULOMB_K*q1*q2*(x1-x2)/(np.linalg.norm((x1-x2,y1-y2))**3 + EPS)
+    return COULOMB_K*q1*q2*(x1-x2)/(m1*np.linalg.norm((x1-x2,y1-y2))**3 + EPS)
 
 def simulate_steps(state0, m, q, h, steps):
     # state0 is an array of shape (N,4) for N objects
@@ -34,7 +34,7 @@ def simulate_steps(state0, m, q, h, steps):
     simulation = [state0]
     y = y0
     for _ in range(steps):
-        y = y0 + h * get_derivative(y)
+        y += h * get_derivative(y)
         state = np.reshape(y, state0.shape)
-        simulation.append(state)
+        simulation.append(np.copy(state))
     return np.array(simulation)
