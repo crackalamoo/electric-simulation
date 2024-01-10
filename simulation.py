@@ -21,7 +21,9 @@ def simulate_steps(state0, m, q, h, steps):
         for i in range(state.shape[0]):
             xi = state[i,0]
             yi = state[i,1]
-            for j in range(i+1, state.shape[0]):
+            for j in range(state.shape[0]):
+                if i == j:
+                    continue
                 xj = state[j,0]
                 yj = state[j,1]
                 d[i,2] += coulomb_law(xi, xj, yi, yj, q[i], q[j], m[i])

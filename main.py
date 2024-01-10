@@ -6,10 +6,10 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 from simulation import *
 
-DT = 1e-21
+DT = 1e-20
 N = 2
 SIM_LEN = 10000
-SIM_SPEED = 100
+SIM_SPEED = 10
 
 state = np.zeros((N,4))
 m = np.array([
