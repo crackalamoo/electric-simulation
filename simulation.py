@@ -39,9 +39,25 @@ def simulate_steps(state0, m, q, h, steps):
     solver = RK45(
         lambda t,y: get_derivative(y), 0, y0, t_bound=h*steps+1, max_step=h
     )
+    y = y0
     for _ in range(steps):
         # y += h * get_derivative(y)
         solver.step()
-        state = np.reshape(solver.y, state0.shape)
+        y = solver.y
+        state = np.reshape(y, state0.shape)
         simulation.append(np.copy(state))
     return np.array(simulation)
+
+def E_field(state, q, bound, n):
+    x = np.linspace(-bound, bound, n)
+    y = np.linspace(-bound, bound, n)
+    X, Y = np.meshgrid(x, y)
+    u = np.zeros_like(X)
+    v = np.zeros_like(Y)
+    for i in range(state.shape[0]):
+        xi = state[i,0]
+        yi = state[i,1]
+        r2 = np.square(X-xi) + np.square(Y-yi)
+        u += COULOMB_K*q[i]*(X-xi)/(r2**3/2 + EPS)
+        v += COULOMB_K*q[i]*(Y-yi)/(r2**3/2 + EPS)
+    return u, v
