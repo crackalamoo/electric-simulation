@@ -4,22 +4,20 @@ from matplotlib import animation, colors, colormaps
 from matplotlib.collections import LineCollection
 from simulation import *
 
-DT = 1e-19
-N = 3
-SIM_LEN = 5000
-SIM_SPEED = 8
-E_PLOT_N = 100
+DT = 1e-19 # timestep
+N = 3 # number of particles
+SIM_LEN = 5000 # number of steps to simulate
+SIM_SPEED = 8 # number of steps to skip in the animation
+E_PLOT_N = 100 # number of X and Y values in the electric field plot
 
+# N particles each have a state consisting of four values:
+# x position, y position, x velocity, y velocity
 state = np.zeros((N,4))
-m = np.array([
-    938, 0.511, 938
-]) # unit: MeV
-q = np.array([
-    1, -1, 1
-]) # unit: q_e
+m = np.array([938, 0.511, 938]) # mass of each particle. unit: MeV
+q = np.array([1, -1, 1]) # charge of each particle. unit: q_e
 
-dist = 52.9/q[0]
-# angle = np.random.rand() * 2*np.pi
+# set initial state
+dist = 52.9 # unit: pm
 angle = 1.1
 state[1,0] = dist * np.cos(angle)
 state[1,1] = dist * np.sin(angle)
@@ -32,6 +30,7 @@ state[:,0] -= 20
 
 simulation = simulate_steps(state, m, q, DT, SIM_LEN)
 
+# custom colormap for positive and negative charges
 seismic = colormaps['seismic'].resampled(255)
 newcolors = seismic(np.linspace(0, 1, 255))
 for i in range(3):
@@ -40,6 +39,7 @@ for i in range(3):
 newcolors[np.where(newcolors < 0)] = 0
 cmap = colors.ListedColormap(newcolors)
 
+# calculate initial electric field
 bound = dist * 3
 x = np.linspace(-bound, bound, E_PLOT_N)
 y = np.linspace(-bound, bound, E_PLOT_N)
@@ -47,6 +47,7 @@ X, Y = np.meshgrid(x, y)
 Ex, Ey = E_field(state, q, bound, E_PLOT_N)
 E_strength = np.log(Ex**2 + Ey**2 + EPS)
 
+# plot initial particles and electric field
 fig = plt.figure()
 mesh = plt.pcolormesh(X, Y, E_strength, cmap='inferno')
 scatter = plt.scatter(state[:,0], state[:,1], s=np.log(m/np.min(m)+1)*15,
@@ -54,21 +55,23 @@ scatter = plt.scatter(state[:,0], state[:,1], s=np.log(m/np.min(m)+1)*15,
 axs = fig.get_axes()
 
 def animate_func(i):
+    # simulation[i*SIM_SPEED] represents the new state in frame i of the animation
+    # recalculate electric field for the new state
     Ex, Ey = E_field(simulation[i*SIM_SPEED], q, bound, E_PLOT_N)
     E_strength = np.log(Ex**2 + Ey**2)
-    mesh.set_array(E_strength)
-    scatter.set_offsets(simulation[i*SIM_SPEED])
+    mesh.set_array(E_strength) # update electric field plot
+    scatter.set_offsets(simulation[i*SIM_SPEED]) # update particles scatter plot
     return scatter, mesh
+
 anim = animation.FuncAnimation(
     fig, animate_func, frames=range(SIM_LEN//SIM_SPEED), interval=40)
 
 axs[0].set_xlim(-bound, bound)
 axs[0].set_ylim(-bound, bound)
-fig.set_size_inches(6,6)
-fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+fig.set_size_inches(6, 6)
+fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None) # remove white border
 plt.gca().set_aspect('equal')
-plt.gca().set_facecolor('xkcd:black')
 plt.axis('off')
 
 plt.show()
-anim.save('./animation.gif', dpi=50)
+anim.save('./animation.gif', dpi=50) # dpi=50 for lower quality to reduce file size

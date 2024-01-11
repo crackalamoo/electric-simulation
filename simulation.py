@@ -6,7 +6,7 @@ COULOMB_K = 2.533e38 # unit: MeV pm^3/e^2 s^2
 
 def coulomb_law(x1, x2, y1, y2, q1, q2, m1):
     # x-direction acceleration of q1 due to charge q2
-    return COULOMB_K*q1*q2*(x1-x2)/(m1*np.linalg.norm((x1-x2,y1-y2))**3 + EPS)
+    return COULOMB_K * q1*q2 * (x1-x2) / (m1 * np.linalg.norm((x1-x2,y1-y2))**3 + EPS)
 
 def simulate_steps(state0, m, q, h, steps):
     # state0 is an array of shape (N,4) for N objects
@@ -37,7 +37,7 @@ def simulate_steps(state0, m, q, h, steps):
 
     simulation = [state0]
     solver = RK45(
-        lambda t,y: get_derivative(y), 0, y0, t_bound=h*steps+1, max_step=h
+        lambda t,y: get_derivative(y), 0, y0, t_bound=h*(steps+1), max_step=h
     )
     y = y0
     for _ in range(steps):
@@ -49,6 +49,7 @@ def simulate_steps(state0, m, q, h, steps):
     return np.array(simulation)
 
 def E_field(state, q, bound, n):
+    # returns x- and y-direction electric fields at each point given a state
     x = np.linspace(-bound, bound, n)
     y = np.linspace(-bound, bound, n)
     X, Y = np.meshgrid(x, y)
@@ -58,6 +59,6 @@ def E_field(state, q, bound, n):
         xi = state[i,0]
         yi = state[i,1]
         r2 = np.square(X-xi) + np.square(Y-yi)
-        u += COULOMB_K*q[i]*(X-xi)/(r2**3/2 + EPS)
-        v += COULOMB_K*q[i]*(Y-yi)/(r2**3/2 + EPS)
+        u += COULOMB_K*q[i]*(X-xi) / (r2**3/2 + EPS)
+        v += COULOMB_K*q[i]*(Y-yi) / (r2**3/2 + EPS)
     return u, v
