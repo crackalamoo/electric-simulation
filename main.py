@@ -60,11 +60,10 @@ def animate_func(i):
     scatter.set_offsets(simulation[i*SIM_SPEED])
     return scatter, mesh
 anim = animation.FuncAnimation(
-    fig, animate_func, frames=range(SIM_LEN//SIM_SPEED), interval=20)
+    fig, animate_func, frames=range(SIM_LEN//SIM_SPEED), interval=40)
 
 axs[0].set_xlim(-bound, bound)
 axs[0].set_ylim(-bound, bound)
-fig.tight_layout()
 fig.set_size_inches(6,6)
 fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
 plt.gca().set_aspect('equal')
@@ -72,4 +71,4 @@ plt.gca().set_facecolor('xkcd:black')
 plt.axis('off')
 
 plt.show()
-anim.save('./animation.gif')
+anim.save('./animation.gif', dpi=50)
